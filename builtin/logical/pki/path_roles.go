@@ -278,6 +278,13 @@ include the Common Name (cn); use use_csr_common_name
 for that. Defaults to true.`,
 		},
 
+		"use_csr_serial_number": {
+			Type:     framework.TypeBool,
+			Required: true,
+			Description: `If set, when used with a signing profile,
+the serial number from the CSR's subject will be used. Defaults to true.`,
+		},
+
 		"ou": {
 			Type: framework.TypeCommaStringSlice,
 			Description: `If set, OU (OrganizationalUnit) will be set to
@@ -337,7 +344,7 @@ leases adversely affect the startup time of Vault.`,
 			Type: framework.TypeBool,
 			Description: `
 If set, certificates issued/signed against this role will not be stored in the
-storage backend. This can improve performance when issuing large numbers of 
+storage backend. This can improve performance when issuing large numbers of
 certificates. However, certificates issued in this way cannot be enumerated
 or revoked, so this option is recommended only for certificates that are
 non-sensitive, or extremely short-lived. This option implies a value of "false"
@@ -363,7 +370,7 @@ non-Hostname, non-Email address CNs.`,
 		"policy_identifiers": {
 			Type: framework.TypeCommaStringSlice,
 			Description: `A comma-separated string or list of policy OIDs, or a JSON list of qualified policy
-information, which must include an oid, and may include a notice and/or cps url, using the form 
+information, which must include an oid, and may include a notice and/or cps url, using the form
 [{"oid"="1.3.6.1.4.1.7.8","notice"="I am a user Notice"}, {"oid"="1.3.6.1.4.1.44947.1.2.4 ","cps"="https://example.com"}].`,
 		},
 
@@ -674,6 +681,17 @@ for that. Defaults to true.`,
 				},
 			},
 
+			"use_csr_serial_number": {
+				Type:    framework.TypeBool,
+				Default: true,
+				Description: `If set, when used with a signing profile,
+the serial number from the CSR's subject will be used. Defaults to true.`,
+				DisplayAttrs: &framework.DisplayAttributes{
+					Name:  "Use CSR Subject Serial Number",
+					Value: true,
+				},
+			},
+
 			"ou": {
 				Type: framework.TypeCommaStringSlice,
 				Description: `If set, OU (OrganizationalUnit) will be set to
@@ -742,7 +760,7 @@ leases adversely affect the startup time of Vault.`,
 				Type: framework.TypeBool,
 				Description: `
 If set, certificates issued/signed against this role will not be stored in the
-storage backend. This can improve performance when issuing large numbers of 
+storage backend. This can improve performance when issuing large numbers of
 certificates. However, certificates issued in this way cannot be enumerated
 or revoked, so this option is recommended only for certificates that are
 non-sensitive, or extremely short-lived. This option implies a value of "false"
@@ -776,7 +794,7 @@ non-Hostname, non-Email address CNs.`,
 			"policy_identifiers": {
 				Type: framework.TypeCommaStringSlice,
 				Description: `A comma-separated string or list of policy OIDs, or a JSON list of qualified policy
-information, which must include an oid, and may include a notice and/or cps url, using the form 
+information, which must include an oid, and may include a notice and/or cps url, using the form
 [{"oid"="1.3.6.1.4.1.7.8","notice"="I am a user Notice"}, {"oid"="1.3.6.1.4.1.44947.1.2.4 ","cps"="https://example.com"}].`,
 			},
 
@@ -1074,6 +1092,7 @@ func (b *backend) pathRoleCreate(ctx context.Context, req *logical.Request, data
 		UsePSS:                        data.Get("use_pss").(bool),
 		UseCSRCommonName:              data.Get("use_csr_common_name").(bool),
 		UseCSRSANs:                    data.Get("use_csr_sans").(bool),
+		UseCSRSerialNumber:            data.Get("use_csr_serial_number").(bool),
 		KeyUsage:                      data.Get("key_usage").([]string),
 		ExtKeyUsage:                   data.Get("ext_key_usage").([]string),
 		ExtKeyUsageOIDs:               data.Get("ext_key_usage_oids").([]string),
@@ -1274,6 +1293,7 @@ func (b *backend) pathRolePatch(ctx context.Context, req *logical.Request, data 
 		UsePSS:                        getWithExplicitDefault(data, "use_pss", oldEntry.UsePSS).(bool),
 		UseCSRCommonName:              getWithExplicitDefault(data, "use_csr_common_name", oldEntry.UseCSRCommonName).(bool),
 		UseCSRSANs:                    getWithExplicitDefault(data, "use_csr_sans", oldEntry.UseCSRSANs).(bool),
+		UseCSRSerialNumber:            getWithExplicitDefault(data, "use_csr_serial_number", oldEntry.UseCSRSerialNumber).(bool),
 		KeyUsage:                      getWithExplicitDefault(data, "key_usage", oldEntry.KeyUsage).([]string),
 		ExtKeyUsage:                   getWithExplicitDefault(data, "ext_key_usage", oldEntry.ExtKeyUsage).([]string),
 		ExtKeyUsageOIDs:               getWithExplicitDefault(data, "ext_key_usage_oids", oldEntry.ExtKeyUsageOIDs).([]string),
@@ -1469,6 +1489,7 @@ type roleEntry struct {
 	EmailProtectionFlag           bool          `json:"email_protection_flag"`
 	UseCSRCommonName              bool          `json:"use_csr_common_name"`
 	UseCSRSANs                    bool          `json:"use_csr_sans"`
+	UseCSRSerialNumber            bool          `json:"use_csr_serial_number"`
 	KeyType                       string        `json:"key_type"`
 	KeyBits                       int           `json:"key_bits"`
 	UsePSS                        bool          `json:"use_pss"`
@@ -1527,6 +1548,7 @@ func (r *roleEntry) ToResponseData() map[string]interface{} {
 		"email_protection_flag":              r.EmailProtectionFlag,
 		"use_csr_common_name":                r.UseCSRCommonName,
 		"use_csr_sans":                       r.UseCSRSANs,
+		"use_csr_serial_number":              r.UseCSRSerialNumber,
 		"key_type":                           r.KeyType,
 		"key_bits":                           r.KeyBits,
 		"signature_bits":                     r.SignatureBits,

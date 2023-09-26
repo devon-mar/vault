@@ -1223,7 +1223,7 @@ func generateCreationBundle(b *backend, data *inputBundle, caSign *certutil.CAIn
 		ridSerialNumber = data.apiData.Get("serial_number").(string)
 
 		// only take serial number from CSR if one was not supplied via API
-		if ridSerialNumber == "" && csr != nil {
+		if data.role.UseCSRSerialNumber && ridSerialNumber == "" && csr != nil {
 			ridSerialNumber = csr.Subject.SerialNumber
 		}
 

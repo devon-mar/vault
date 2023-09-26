@@ -283,6 +283,7 @@ func buildSignVerbatimRole(data *framework.FieldData, role *roleEntry) *roleEntr
 		KeyType:                   "any",
 		UseCSRCommonName:          true,
 		UseCSRSANs:                true,
+		UseCSRSerialNumber:        true,
 		AllowedOtherSANs:          []string{"*"},
 		AllowedSerialNumbers:      []string{"*"},
 		AllowedURISANs:            []string{"*"},
